@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionário do Oitavo Ano</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  body { background:#0a0a12; color:#e8ecf4; min-height:100vh; }
+  header {
+    background:linear-gradient(135deg,#000428,#004e92);
+    padding:36px 20px; text-align:center; border-bottom:3px solid #00a8ff;
+  }
+  header h1 { font-size:32px; letter-spacing:1px; color:#ffffff; }
+  header p { color:#9ecbff; margin-top:6px; font-size:15px; }
+  main { max-width:760px; margin:0 auto; padding:28px 16px 60px; }
+  .pergunta {
+    background:#111827; border:1px solid #1f3a5f; border-left:5px solid #00a8ff;
+    border-radius:12px; padding:18px; margin-bottom:18px;
+  }
+  .pergunta h3 { font-size:16.5px; margin-bottom:12px; color:#ffffff; }
+  .linha {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:9px 8px; border-radius:8px; margin-bottom:4px;
+  }
+  .linha:hover { background:#16233a; }
+  .linha label { flex:1; font-size:14.5px; color:#c3d0e5; cursor:pointer; }
+  .linha input {
+    width:76px; padding:8px; text-align:center; font-size:15px;
+    background:#0a0f1c; color:#ffffff; border:1px solid #00a8ff;
+    border-radius:8px; outline:none;
+  }
+  .linha input:focus { box-shadow:0 0 0 3px rgba(0,168,255,.25); }
+  .botoes { display:flex; gap:14px; margin:28px 0 10px; flex-wrap:wrap; }
+  button {
+    flex:1; min-width:180px; padding:14px 20px; font-size:16px; font-weight:bold;
+    border-radius:10px; cursor:pointer; border:none; transition:.2s;
+  }
+  .btn-azul { background:#00a8ff; color:#001020; }
+  .btn-azul:hover { background:#33bdff; transform:translateY(-2px); }
+  .btn-preto { background:#000000; color:#00a8ff; border:2px solid #00a8ff; }
+  .btn-preto:hover { background:#0b1b2e; transform:translateY(-2px); }
+  #total { text-align:center; margin:14px 0; font-size:15px; color:#9ecbff; }
+  .grafico {
+    background:#111827; border:1px solid #1f3a5f; border-radius:12px;
+    padding:18px; margin-bottom:18px;
+  }
+  .grafico h3 { font-size:15px; margin-bottom:12px; color:#ffffff; }
+  .barra-area { display:flex; align-items:flex-end; gap:32px; height:170px; padding:0 12px; border-bottom:2px solid #1f3a5f; }
+  .coluna { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .valor { font-size:15px; font-weight:bold; color:#00a8ff; margin-bottom:4px; }
+  .barra { width:100%; max-width:90px; border-radius:6px 6px 0 0; min-height:3px;
+           background:linear-gradient(180deg,#00c6ff,#004e92); }
+  .rotulos { display:flex; gap:32px; padding:8px 12px 0; }
+  .rotulos span { flex:1; text-align:center; font-size:12.5px; color:#c3d0e5; }
+  footer { text-align:center; padding:20px; color:#3d5a80; font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>QUESTIONÁRIO DO OITAVO ANO</h1>
+  <p>Tema: Participação dos estudantes em atividades escolares · 3ª Equipe</p>
+</header>
+<main>
+  <div id="form"></div>
+  <div class="botoes">
+    <button class="btn-azul" onclick="verResultado()">Ver resultado</button>
+    <button class="btn-preto" onclick="baixarCSV()">Baixar CSV</button>
+  </div>
+  <div id="total"></div>
+  <div id="graficos"></div>
+</main>
+<footer>Projetos Integradores de Corresponsabilidade Social — Pesquisa quantitativa</footer>
+<script>
+var DATA = [
+  {q:"1. Você participa de atividades escolares?", o:["Sim","Não","Às vezes"]},
+  {q:"2. Com que frequência você participa das atividades?", o:["Toda semana","Uma vez por mês","Nunca"]},
+  {q:"3. A escola oferece atividades suficientes?", o:["Sim","Não","Parcialmente"]},
+  {q:"4. Participar de atividades ajuda no aprendizado?", o:["Sim","Não","Talvez"]},
+  {q:"5. O que mais atrapalha sua participação?", o:["Falta de tempo","Falta de interesse","Não fico sabendo"]},
+  {q:"6. Como você fica sabendo das atividades?", o:["Avisos em sala","WhatsApp da turma","Cartazes e murais"]},
+  {q:"7. Qual atividade você mais gosta?", o:["Esportes","Culturais","Científicas"]},
+  {q:"8. Gostaria de novas atividades na escola?", o:["Sim","Não","Talvez"]}
+];
+
+var form = document.getElementById('form');
+DATA.forEach(function(item, qi){
+  var div = document.createElement('div');
+  div.className = 'pergunta';
+  var html = '<h3>' + item.q + '</h3>';
+  item.o.forEach(function(op, oi){
+    html += '<div class="linha"><label>( ) ' + op + '</label>' +
+            '<input type="number" min="0" placeholder="0" data-q="' + qi + '" data-o="' + oi + '"></div>';
+  });
+  div.innerHTML = html;
+  form.appendChild(div);
+});
+
+function valores(){
+  var v = [];
+  document.querySelectorAll('#form input').forEach(function(i){
+    v.push(Math.max(0, parseInt(i.value) || 0));
+  });
+  return v;
+}
+
+function baixarCSV(){
+  var v = valores(), k = 0;
+  var csv = 'Pergunta;Resposta;Quantidade\r\n';
+  DATA.forEach(function(item){
+    item.o.forEach(function(op){
+      csv += '"' + item.q + '";"' + op + '";' + v[k++] + '\r\n';
+    });
+  });
+  var blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'questionario_oitavo_ano.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function verResultado(){
+  var v = valores(), k = 0;
+  var total = v.reduce(function(s,n){return s+n;},0);
+  document.getElementById('total').textContent = 'Total de respostas registradas: ' + total;
+  var box = document.getElementById('graficos');
+  box.innerHTML = '';
+  DATA.forEach(function(item){
+    var nums = [v[k], v[k+1], v[k+2]]; k += 3;
+    var max = Math.max.apply(null, nums.concat([1]));
+    var g = document.createElement('div');
+    g.className = 'grafico';
+    var barras = '', rotulos = '';
+    nums.forEach(function(n, i){
+      var h = Math.round((n / max) * 140);
+      barras += '<div class="coluna"><div class="valor">' + n + '</div>' +
+                '<div class="barra" style="height:' + Math.max(h,3) + 'px"></div></div>';
+      rotulos += '<span>' + item.o[i] + '</span>';
+    });
+    g.innerHTML = '<h3>' + item.q + '</h3><div class="barra-area">' + barras +
+                  '</div><div class="rotulos">' + rotulos + '</div>';
+    box.appendChild(g);
+  });
+  box.scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
